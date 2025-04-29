@@ -33,7 +33,7 @@ uint8_t const desc_hid_report[] = {
 };
 
 uint8_t const *tud_descriptor_report_cb(void) {
-  (void)instance;
+  
   return desc_hid_report;
 }
 
@@ -80,7 +80,7 @@ uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id,
 }
 
 uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance) {
-  (void)instance;
+  
   return desc_hid_report;
 }
 
