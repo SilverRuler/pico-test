@@ -1,0 +1,43 @@
+name: Build UF2 for Raspberry Pi Pico W
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v3
+
+    - name: Install ARM GCC Toolchain
+      uses: fiam/arm-none-eabi-gcc@v1
+      with:
+        release: '10-2020-q4'
+
+    - name: Install CMake, Ninja, Python
+      run: sudo apt-get update && sudo apt-get install -y cmake ninja-build python3 python3-pip
+
+    - name: Install Pico SDK and set environment
+      run: |
+        git clone -b master https://github.com/raspberrypi/pico-sdk.git
+        cd pico-sdk
+        git submodule update --init
+        cd ..
+        echo "PICO_SDK_PATH=$PWD/pico-sdk" >> $GITHUB_ENV
+
+    - name: Configure and build project
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G Ninja
+        ninja
+
+    - name: Upload UF2 artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: pico-uf2
+        path: build/*.uf2
