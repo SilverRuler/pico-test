@@ -1,6 +1,7 @@
 #include "bsp/board.h"
 #include "tusb.h"
 #include "pico/stdlib.h"
+#include <string.h>
 
 void hid_task(void);
 
@@ -75,4 +76,33 @@ uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id,
                                uint8_t* buffer, uint16_t reqlen) {
   // Optional: return HID report to host
   return 0;
+}
+
+uint8_t const *tud_hid_descriptor_report_cb(void) {
+  return desc_hid_report;
+}
+
+uint16_t const* tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
+  static uint16_t desc_str[32];
+  const char* str = "";
+
+  switch(index) {
+    case 0: {
+      static const uint16_t lang_id[] = { 0x0409 };
+      return lang_id;
+    }
+    case 1: str = "Maker"; break;
+    case 2: str = "Pico HID"; break;
+    case 3: str = "123456"; break;
+    default: return NULL;
+  }
+
+  uint8_t chr_count = strlen(str);
+  if (chr_count > 31) chr_count = 31;
+
+  desc_str[0] = (TUSB_DESC_STRING << 8) | (2 * chr_count + 2);
+  for (uint8_t i = 0; i < chr_count; ++i)
+    desc_str[1 + i] = str[i];
+
+  return desc_str;
 }
